@@ -199,7 +199,6 @@ wire [7:0] timer_data_out = timer[{cpu_addr[0],3'd0} +: 8];
 
 // CPU address decodes
 wire pgrom_cs = cpu_addr[15:14] == 2'b00;
-//wire chrom_cs = cpu_addr[15:12] == 4'b0100;  // CPU never accesses the character ROM data directly
 wire chram_cs = cpu_addr[15:11] == 5'b10000;
 wire fgcolram_cs = cpu_addr[15:11] == 5'b10001;
 wire bgcolram_cs = cpu_addr[15:11] == 5'b10010;
@@ -234,7 +233,6 @@ wire bgcolram_wr = !cpu_wr_n && bgcolram_cs;
 
 // MEMORY
 // ------
-
 // Program ROM - 0x0000 - 0x3FFF (0x4000 / 16384 bytes)
 dpram #(14,8, "rom.hex") pgrom
 (

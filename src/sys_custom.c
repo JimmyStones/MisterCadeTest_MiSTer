@@ -88,7 +88,7 @@ void basic_input()
 	input_b_last = input_b;
 	input_x_last = input_x;
 	input_y_last = input_y;	
-	
+
 	input_up = CHECK_BIT(joystick[0], 3);
 	input_down = CHECK_BIT(joystick[0], 2);
 	input_left = CHECK_BIT(joystick[0], 1);

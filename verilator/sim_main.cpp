@@ -320,7 +320,7 @@ int main(int argc, char** argv, char** env) {
 		{
 			if (input.inputs[i]) { top->joystick_0 |= (1 << i); }
 		}
-		top->joystick_1 = top->joystick_0;
+		//top->joystick_1 = top->joystick_0;
 
 		// Run simulation
 		if (run_enable) {

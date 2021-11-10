@@ -145,7 +145,6 @@ void main()
 					if (channel_tick[c] == channel_speed[c])
 					{
 						channel_pos[c] += channel_dir[c];
-						write_stringf("%3d", 0xFF, 6, 3 + c, channel_pos[c]);
 						ay_set_ch(c, channel_pos[c]);
 						if (channel_pos[c] >= channel_high[c])
 						{

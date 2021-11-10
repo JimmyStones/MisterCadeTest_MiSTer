@@ -26,6 +26,6 @@
 void page_frame()
 {
 	clear_chars(0);
-	write_string("MiSTerCade Tester", 0b11111111, 11, 1);
+	write_string("MiSTercade Tester", 0b11111111, 11, 1);
 	panel_shaded(0, 0, 39, 2, 0b00000111, 0b00000110, 0b00000100);
 }
