@@ -1,8 +1,0 @@
-<misterromdescription>
-	<name>MisterCadeTester</name>
-	<setname>mistercadetester</setname>
-	<rbf>mistercadetester</rbf>
-	<rom index="2" md5="none" zip="mistercadetester.zip">
-		<part ignore_crc="" name="sound.wav"></part>
-	</rom>
-</misterromdescription>
