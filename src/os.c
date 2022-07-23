@@ -87,12 +87,12 @@ void main()
 
 	chram_size = chram_cols * chram_rows;
 
-	ay_write(0x10, 0xFF);
+	// ay_write(0x10, 0xFF);
 	for (char a = 0; a < 16; a++)
 	{
-		ay_write(a, 0xFF);
+		ay_write(a, 0x00);
 	}
-	ay_write(0x07, 0b11111000);
+	 ay_write(0x07, 0b11111000);
 
 	while (1)
 	{

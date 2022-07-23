@@ -1,6 +1,13 @@
 #include "sim_clock.h"
 #include <string>
 
+SimClock::SimClock() {
+	ratio = 1;
+	count = 0;
+	clk = false;
+	old = false;
+}
+
 SimClock::SimClock(int r) {
 	ratio = r;
 	count = 0;
@@ -15,10 +22,10 @@ SimClock::~SimClock() {
 void SimClock::Tick() {
 	old = clk;
 	count++;
-	if (count > ratio) {
+	if (count == ratio) {
 		count = 0;
+		clk = !clk;
 	}
-	clk = (count == 0);
 }
 
 void SimClock::Reset() {
@@ -29,4 +36,7 @@ void SimClock::Reset() {
 
 bool SimClock::IsRising() {
 	return clk && !old;
+}
+bool SimClock::IsFalling() {
+	return !clk && old;
 }

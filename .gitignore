@@ -53,3 +53,4 @@ src/os.sym
 verilator/imgui.ini
 verilator/imgui.ini
 docs/*
+verilator/audio.wav

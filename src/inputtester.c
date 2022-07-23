@@ -26,14 +26,14 @@
 // Input tester variables
 unsigned char joystick_last[12];
 
-#define PAD_COUNT 2
-#define BUTTON_COUNT 14
+#define PAD_COUNT 4
+#define BUTTON_COUNT 12
 
-char pad_offset_x[PAD_COUNT] = {7, 7};
-char pad_offset_y[PAD_COUNT] = {5, 17};
-char pad_size_x = 26;
-char pad_size_y = 10;
-char button_symbol[BUTTON_COUNT][14] = {
+char pad_offset_x[PAD_COUNT] = {3, 21, 3, 21};
+char pad_offset_y[PAD_COUNT] = {5, 5, 18, 18};
+char pad_size_x = 16;
+char pad_size_y = 8;
+char button_symbol[BUTTON_COUNT][8] = {
     "R",
     "L",
     "D",
@@ -45,12 +45,21 @@ char button_symbol[BUTTON_COUNT][14] = {
     "5",
     "6",
     "Coin",
-    "Start",
-    "Pause/Service",
-    "Test"};
-unsigned char button_x[BUTTON_COUNT] = {6, 2, 4, 4, 20, 22, 24, 20, 22, 24, 2, 2, 12, 21};
-unsigned char button_y[BUTTON_COUNT] = {3, 3, 4, 2, 2, 2, 2, 4, 4, 4, 6, 8, 6, 8};
-unsigned char button_hit[BUTTON_COUNT][2];
+    "Start"};
+
+unsigned char player_count = 4;
+
+unsigned char button_x[BUTTON_COUNT] = {6, 2, 4, 4, 10, 12, 14, 10, 12, 14, 2, 10};
+unsigned char button_y[BUTTON_COUNT] = {3, 3, 4, 2, 2, 2, 2, 4, 4, 4, 6, 6};
+unsigned char button_hit[BUTTON_COUNT][PAD_COUNT];
+bool pause_hit;
+bool test_hit;
+
+unsigned char pause_label_x = 8;
+unsigned char pause_label_y = 15;
+unsigned char test_label_x = 24;
+unsigned char test_label_y = 15;
+
 #define color_button_active 0xFF
 #define color_button_inactive 0b01010010
 #define color_button_hit 0b00111000
@@ -60,19 +69,13 @@ void page_inputtester_mistercade()
 {
     page_frame();
 
-    // Draw pads
-    for (char j = 0; j < PAD_COUNT; j++)
-    {
-        write_stringf("%dUP", 0xFF, pad_offset_x[j] - 5, pad_offset_y[j] + 5, j + 1);
-        panel(pad_offset_x[j], pad_offset_y[j], pad_offset_x[j] + pad_size_x, pad_offset_y[j] + pad_size_y, color_pad_outline);
-    }
-}
+    player_count = input0 & 0x8 ? 4 : 2;
 
-void reset_inputstates()
-{
-    for (char i = 0; i < 12; i++)
+    // Draw pads
+    for (char j = 0; j < player_count; j++)
     {
-        joystick_last[i] = 1;
+        write_stringf("%dUP", 0xFF, pad_offset_x[j], pad_offset_y[j] - 1, j + 1);
+        panel(pad_offset_x[j], pad_offset_y[j], pad_offset_x[j] + pad_size_x, pad_offset_y[j] + pad_size_y, color_pad_outline);
     }
 }
 
@@ -83,16 +86,12 @@ void start_inputtester_mistercade()
 
     // Draw page
     page_inputtester_mistercade();
-
-    // Reset last states for inputs
-    reset_inputstates();
 }
 
 // Mistercade input tester state
 void inputtester_mistercade()
 {
 
-    // Handle secret code detection (joypad 1 directions)
     if (HBLANK_RISING)
     {
         basic_input();
@@ -102,8 +101,26 @@ void inputtester_mistercade()
     if (VBLANK_RISING)
     {
 
+        // Handle pause and test buttons
+        bool pause_active = CHECK_BIT(joystick[1], BUTTON_COUNT - 8);
+        bool test_active = CHECK_BIT(joystick[1], BUTTON_COUNT - 7);
+        if (pause_active)
+        {
+            pause_hit = 1;
+        }
+        if (test_active)
+        {
+            test_hit = 1;
+        }
+        unsigned char pause_color = pause_active ? color_button_active : pause_hit ? color_button_hit
+                                                                                   : color_button_inactive;
+        write_string("Pause/Service", pause_color, pause_label_x, pause_label_y);
+        unsigned char test_color = test_active ? color_button_active : test_hit ? color_button_hit
+                                                                                : color_button_inactive;
+        write_string("Test", test_color, test_label_x, test_label_y);
+
         // Draw control pad buttons
-        for (char joy = 0; joy < PAD_COUNT; joy++)
+        for (char joy = 0; joy < player_count; joy++)
         {
             char index = joy * 4;
             char nohit = 0;
@@ -122,12 +139,14 @@ void inputtester_mistercade()
                     }
                 }
                 unsigned char color = active ? color_button_active : button_hit[button][joy] ? color_button_hit
-                                                                                        : color_button_inactive;
+                                                                                             : color_button_inactive;
                 write_string(button_symbol[button], color, pad_offset_x[joy] + button_x[button], pad_offset_y[joy] + button_y[button]);
             }
             if (nohit == 0)
             {
-                write_string("OK!", 0b00111000, pad_offset_x[joy] - 5, pad_offset_y[joy] + 6);
+                write_stringf("%dUP", 0b00111000, pad_offset_x[joy], pad_offset_y[joy] - 1, joy + 1);
+                write_string("OK!", 0b00111000, pad_offset_x[joy] + 14, pad_offset_y[joy] - 1);
+                write_string("OK!", 0b00111000, pad_offset_x[joy] + 14, pad_offset_y[joy] - 1);
             }
         }
     }

@@ -29,6 +29,8 @@ module system (
 	input [7:0]		dn_data,
 	input [7:0]		dn_index,
 
+	input 			player_count,
+
 	// 6 devices, 32 buttons each
 	input [191:0]	joystick,
 	
@@ -106,7 +108,7 @@ wire [11:0] chram_addr = {chram_y, chram_x};
 wire [11:0] chrom_addr = {1'b0, chmap_data_out[7:0], chpos_y};
 wire chpixel = chrom_data_out[chpos_x[2:0]];
 
-
+// Background gradients
 reg [7:0] bgcol_r;
 reg [7:0] bgcol_g;
 reg [7:0] bgcol_b;
@@ -193,7 +195,7 @@ wire [7:0] bgcolram_data_out;
 wire [7:0] chmap_data_out;
 
 // Hardware inputs
-wire [7:0] in0_data_out = {VGA_HS, VGA_VS,VGA_HB, VGA_VB, 4'b1000};
+wire [7:0] in0_data_out = {VGA_HS, VGA_VS,VGA_HB, VGA_VB, player_count, 3'b000};
 wire [7:0] joystick_data_out = joystick[{cpu_addr[4:0],3'd0} +: 8];
 wire [7:0] timer_data_out = timer[{cpu_addr[0],3'd0} +: 8];
 
@@ -374,12 +376,12 @@ assign AUDIO_R = { 1'b0, audio_out_b[9:0],5'd0};
 // assign AUDIO_R = audio_out[9:0];
 
 
-// always @(posedge clk_sys) begin
-// 	if((snd_reset_cs && ~cpu_wr_n)) $display("SND RESET");
-// 	if(audio_out>16'd0) $display("audio_out %b", audio_out);
-// 	if(audio_out_a>16'd0) $display("audio_out_a %b", audio_out_a);
-// 	if(audio_out_b>16'd0) $display("audio_out_b %b", audio_out_b);
-// 	//if(snd_cs && ~cpu_wr_n) $display("SND_CS : %x %x", snd_addr, cpu_dout);
-// end
+always @(posedge clk_sys) begin
+	//if((snd_reset_cs && ~cpu_wr_n)) $display("SND RESET");
+	// if(audio_out>16'd0) $display("audio_out %b", audio_out);
+	// if(audio_out_a>16'd0) $display("audio_out_a %b", audio_out_a);
+	// if(audio_out_b>16'd0) $display("audio_out_b %b", audio_out_b);
+	if(snd_cs && ~cpu_wr_n) $display("SND_CS : %x %x", snd_addr, cpu_dout);
+end
 
 endmodule

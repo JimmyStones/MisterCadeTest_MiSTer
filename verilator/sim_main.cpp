@@ -2,6 +2,7 @@
 #include "Vemu.h"
 
 #include "imgui.h"
+#include "implot.h"
 #ifndef _MSC_VER
 #include <stdio.h>
 #include <SDL.h>
@@ -15,6 +16,7 @@
 #include "sim_console.h"
 #include "sim_bus.h"
 #include "sim_video.h"
+#include "sim_audio.h"
 #include "sim_input.h"
 #include "sim_clock.h"
 
@@ -26,6 +28,7 @@
 const char* windowTitle = "Verilator Sim: MisterCadeTest";
 bool showDebugWindow = true;
 const char* debugWindowTitle = "Virtual Dev Board v1.0";
+const char* windowTitle_Audio = "Audio output";
 DebugConsole console;
 MemoryEditor mem_edit_1;
 MemoryEditor mem_edit_2;
@@ -56,8 +59,11 @@ const int input_test = 13;
 // -----
 #define VGA_WIDTH 320
 #define VGA_HEIGHT 240
+#define VGA_SCALE_X vga_scale
+#define VGA_SCALE_Y vga_scale
 #define VGA_ROTATE 0  // 90 degrees anti-clockwise
 SimVideo video(VGA_WIDTH, VGA_HEIGHT, VGA_ROTATE);
+float vga_scale = 2.0;
 
 // Simulation control
 // ------------------
@@ -84,8 +90,16 @@ double sc_time_stamp() {	    // Called by $time in Verilog.
 	return main_time;
 }
 
+int clk_sys_freq = 24000000;
 SimClock clk_sys(1);
 
+
+// Audio
+// -----	
+//#define DISABLE_AUDIO
+#ifndef DISABLE_AUDIO
+SimAudio audio(clk_sys_freq, true);
+#endif
 
 
 
@@ -124,6 +138,13 @@ int verilate() {
 			top->eval();
 			if (clk_sys.clk) { bus.AfterEval(); }
 		}
+
+#ifndef DISABLE_AUDIO
+		if (clk_sys.IsRising())
+		{
+			audio.Clock(top->AUDIO_L, top->AUDIO_R);
+		}
+#endif
 
 		// Output pixels on rising edge of pixel clock
 		if (clk_sys.IsRising() && top->emu__DOT__ce_pix) {
@@ -205,6 +226,10 @@ int main(int argc, char** argv, char** env) {
 	// Setup video output
 	if (video.Initialise(windowTitle) == 1) { return 1; }
 
+#ifndef DISABLE_AUDIO
+	audio.Initialise();
+#endif
+
 	// Initial reset
 	resetSim();
 
@@ -280,9 +305,9 @@ int main(int argc, char** argv, char** env) {
 		ImGui::Begin("CHROM Editor");
 		mem_edit_1.DrawContents(top->emu__DOT__system__DOT__chrom__DOT__mem, 2048, 0);
 		ImGui::End();*/
-		ImGui::Begin("WKRAM Editor");
-		mem_edit_2.DrawContents(&top->emu__DOT__system__DOT__wkram__DOT__mem, 16384, 0);
-		ImGui::End();
+		//ImGui::Begin("WKRAM Editor");
+		//mem_edit_2.DrawContents(&top->emu__DOT__system__DOT__wkram__DOT__mem, 16384, 0);
+		//ImGui::End();
 		//ImGui::Begin("CHRAM Editor");
 		//mem_edit_3.DrawContents(top->emu__DOT__system__DOT__chram__DOT__mem, 2048, 0);
 		//ImGui::End();
@@ -290,29 +315,6 @@ int main(int argc, char** argv, char** env) {
 		//mem_edit_3.DrawContents(top->emu__DOT__system__DOT__colram__DOT__mem, 2048, 0);
 		//ImGui::End();
 
-		// File Dialog to load rom 
-		if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey"))
-		{
-			// action if OK
-			if (ImGuiFileDialog::Instance()->IsOk())
-			{
-				std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
-				std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-				// action
-				bus.QueueDownload(filePathName, 0, true);
-			}
-
-			// close
-			ImGuiFileDialog::Instance()->Close();
-		}
-
-		ImGui::Begin("CPU Registers");
-		ImGui::Spacing();
-		ImGui::Text("PC      0x%04X", top->emu__DOT__system__DOT__T80x__DOT__i_tv80_core__DOT__PC);
-		ImGui::Text("ACC     0x%04X", top->emu__DOT__system__DOT__T80x__DOT__i_tv80_core__DOT__ACC);
-		ImGui::End();
-
-		video.UpdateTexture();
 
 		// Pass inputs to sim
 		top->joystick_0 = 0;
@@ -320,7 +322,40 @@ int main(int argc, char** argv, char** env) {
 		{
 			if (input.inputs[i]) { top->joystick_0 |= (1 << i); }
 		}
-		//top->joystick_1 = top->joystick_0;
+		top->joystick_1 = top->joystick_0;
+		top->joystick_2 = top->joystick_0;
+		top->joystick_3 = top->joystick_0;
+
+		int windowX = 550;
+		int windowWidth = (VGA_WIDTH * VGA_SCALE_X) + 24;
+		int windowHeight = (VGA_HEIGHT * VGA_SCALE_Y) + 90;
+#ifndef DISABLE_AUDIO
+
+		ImGui::Begin(windowTitle_Audio);
+		ImGui::SetWindowSize(windowTitle_Audio, ImVec2(windowWidth, 250), ImGuiCond_Once);
+		if (run_enable) {
+			audio.CollectDebug((signed short)top->AUDIO_L, (signed short)top->AUDIO_R);
+		}
+		int channelWidth = (windowWidth / 2) - 16;
+		ImPlot::CreateContext();
+		if (ImPlot::BeginPlot("Audio - L", ImVec2(channelWidth, 220), ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoTitle)) {
+			ImPlot::SetupAxes("T", "A", ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks);
+			ImPlot::SetupAxesLimits(0, 1, -1, 1, ImPlotCond_Once);
+			ImPlot::PlotStairs("", audio.debug_positions, audio.debug_wave_l, audio.debug_max_samples, audio.debug_pos);
+			ImPlot::EndPlot();
+		}
+		ImGui::SameLine();
+		if (ImPlot::BeginPlot("Audio - R", ImVec2(channelWidth, 220), ImPlotFlags_NoLegend | ImPlotFlags_NoMenus | ImPlotFlags_NoTitle)) {
+			ImPlot::SetupAxes("T", "A", ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoLabel | ImPlotAxisFlags_NoTickMarks);
+			ImPlot::SetupAxesLimits(0, 1, -1, 1, ImPlotCond_Once);
+			ImPlot::PlotStairs("", audio.debug_positions, audio.debug_wave_r, audio.debug_max_samples, audio.debug_pos);
+			ImPlot::EndPlot();
+		}
+		ImPlot::DestroyContext();
+		ImGui::End();
+#endif
+
+		video.UpdateTexture();
 
 		// Run simulation
 		if (run_enable) {

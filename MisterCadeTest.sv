@@ -203,10 +203,12 @@ localparam CONF_STR = {
 	"-;",
 	"O89,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"-;",
+	"O1,Number of players,2,4;",
+	"-;",
 	"F0,BIN,Load BIOS;",
 	"-;",
-	"J1,1,2,3,4,5,6,Coin,Start,Pause/Service,Test;",
 	"R0,Reset;",
+	"J1,1,2,3,4,5,6,Coin,Start,Pause/Service,Test;",
 	"V,v",`BUILD_DATE
 };
 
@@ -310,6 +312,7 @@ system system(
 	.dn_data(ioctl_dout),
 	.dn_wr(ioctl_wr),
 	.dn_index(ioctl_index),
+	.player_count(status[1]),
 	.joystick({joystick_5,joystick_4,joystick_3,joystick_2,joystick_1,joystick_0}),
 	.AUDIO_L(AUDIO_L),
 	.AUDIO_R(AUDIO_R)

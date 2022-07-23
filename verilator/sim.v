@@ -46,7 +46,10 @@ module emu (
 	input [24:0]	ioctl_addr,
 	input [7:0]		ioctl_dout,
 	input [7:0]		ioctl_index,
-	output reg		ioctl_wait=1'b0
+	output reg		ioctl_wait=1'b0,
+
+	output [15:0] AUDIO_L,
+	output [15:0] AUDIO_R
 );
 
 // Clock divider from JTFRAME
@@ -59,9 +62,6 @@ jtframe_cen24 divider
 	//.cen4(ce_pix) // <-- correct video speed
 );
 /* verilator lint_on PINMISSING */
-
-reg [15:0] audio_l;
-reg [15:0] audio_r;
 
 system system(
 	.clk_sys(clk_sys),
@@ -78,11 +78,12 @@ system system(
 	.dn_data(ioctl_dout),
 	.dn_wr(ioctl_wr),
 	.dn_index(ioctl_index),
+	.player_count(1),
 	
 	.joystick({joystick_5,joystick_4,joystick_3,joystick_2,joystick_1,joystick_0}),
 
-	.AUDIO_L(audio_l),
-	.AUDIO_R(audio_r)
+	.AUDIO_L(AUDIO_L),
+	.AUDIO_R(AUDIO_R)
 );
 
 endmodule 
