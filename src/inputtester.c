@@ -27,7 +27,7 @@
 unsigned char joystick_last[12];
 
 #define PAD_COUNT 4
-#define BUTTON_COUNT 12
+#define BUTTON_COUNT 14
 
 char pad_offset_x[PAD_COUNT] = {3, 21, 3, 21};
 char pad_offset_y[PAD_COUNT] = {5, 5, 18, 18};
@@ -38,19 +38,21 @@ char button_symbol[BUTTON_COUNT][8] = {
     "L",
     "D",
     "U",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
+    "O",
+    "O",
+    "O",
+    "O",
+    "O",
+    "O",
+    "O",
+    "O",
     "Coin",
     "Start"};
 
 unsigned char player_count = 4;
 
-unsigned char button_x[BUTTON_COUNT] = {6, 2, 4, 4, 10, 12, 14, 10, 12, 14, 2, 10};
-unsigned char button_y[BUTTON_COUNT] = {3, 3, 4, 2, 2, 2, 2, 4, 4, 4, 6, 6};
+unsigned char button_x[BUTTON_COUNT] = {6, 2, 4, 4, 8, 10, 12, 14, 8, 10, 12, 14, 2, 10};
+unsigned char button_y[BUTTON_COUNT] = {3, 3, 4, 2, 2, 2, 2, 2, 4, 4, 4, 4, 6, 6};
 unsigned char button_hit[BUTTON_COUNT][PAD_COUNT];
 bool pause_hit;
 bool test_hit;

@@ -208,7 +208,7 @@ localparam CONF_STR = {
 	"F0,BIN,Load BIOS;",
 	"-;",
 	"R0,Reset;",
-	"J1,1,2,3,4,5,6,Coin,Start,Pause/Service,Test;",
+	"J1,P1,P2,P3,P4,K1,K2,K3,K4,Coin,Start,Pause/Service,Test;",
 	"V,v",`BUILD_DATE
 };
 
