@@ -39,21 +39,23 @@ SimBus bus(console);
 
 // Input handling
 // --------------
-SimInput input(14);
+SimInput input(16);
 const int input_right = 0;
 const int input_left = 1;
 const int input_down = 2;
 const int input_up = 3;
-const int input_a = 4;
-const int input_b = 5;
-const int input_x = 6;
-const int input_y = 7;
-const int input_l = 8;
-const int input_r = 9;
-const int input_select = 10;
-const int input_start = 11;
-const int input_pause = 12;
-const int input_test = 13;
+const int input_p1 = 4;
+const int input_p2 = 5;
+const int input_p3 = 6;
+const int input_p4 = 7;
+const int input_k1 = 8;
+const int input_k2 = 9;
+const int input_k3 = 10;
+const int input_k4 = 11;
+const int input_select = 12;
+const int input_start = 13;
+const int input_pause = 14;
+const int input_test = 15;
 
 // Video
 // -----
@@ -95,7 +97,7 @@ SimClock clk_sys(1);
 
 
 // Audio
-// -----	
+// -----
 //#define DISABLE_AUDIO
 #ifndef DISABLE_AUDIO
 SimAudio audio(clk_sys_freq, true);
@@ -164,7 +166,7 @@ int verilate() {
 }
 
 unsigned char mouse_clock = 0;
-unsigned char mouse_buttons= 0;
+unsigned char mouse_buttons = 0;
 unsigned char mouse_x = 0;
 unsigned char mouse_y = 0;
 
@@ -198,12 +200,14 @@ int main(int argc, char** argv, char** env) {
 	input.SetMapping(input_right, DIK_RIGHT);
 	input.SetMapping(input_down, DIK_DOWN);
 	input.SetMapping(input_left, DIK_LEFT);
-	input.SetMapping(input_a, DIK_Z); // A
-	input.SetMapping(input_b, DIK_X); // B
-	input.SetMapping(input_x, DIK_A); // X
-	input.SetMapping(input_y, DIK_S); // Y
-	input.SetMapping(input_l, DIK_Q); // L
-	input.SetMapping(input_r, DIK_W); // R
+	input.SetMapping(input_p1, DIK_A); // P1
+	input.SetMapping(input_p2, DIK_S); // P2
+	input.SetMapping(input_p3, DIK_D); // P3
+	input.SetMapping(input_p4, DIK_F); // P4
+	input.SetMapping(input_k1, DIK_Z); // K1
+	input.SetMapping(input_k2, DIK_X); // K2
+	input.SetMapping(input_k3, DIK_C); // K3
+	input.SetMapping(input_k4, DIK_V); // K4
 	input.SetMapping(input_select, DIK_1); // Select
 	input.SetMapping(input_start, DIK_2); // Start
 	input.SetMapping(input_pause, DIK_3); // Pause/Service
@@ -214,12 +218,14 @@ int main(int argc, char** argv, char** env) {
 	input.SetMapping(input_right, SDL_SCANCODE_RIGHT);
 	input.SetMapping(input_down, SDL_SCANCODE_DOWN);
 	input.SetMapping(input_left, SDL_SCANCODE_LEFT);
-	input.SetMapping(input_a, SDL_SCANCODE_A);
-	input.SetMapping(input_b, SDL_SCANCODE_B);
-	input.SetMapping(input_x, SDL_SCANCODE_X);
-	input.SetMapping(input_y, SDL_SCANCODE_Y);
-	input.SetMapping(input_l, SDL_SCANCODE_L);
-	input.SetMapping(input_r, SDL_SCANCODE_R);
+	input.SetMapping(input_p1, SDL_SCANCODE_A); // P1
+	input.SetMapping(input_p2, SDL_SCANCODE_S); // P2
+	input.SetMapping(input_p3, SDL_SCANCODE_D); // P3
+	input.SetMapping(input_p4, SDL_SCANCODE_F); // P4
+	input.SetMapping(input_k1, SDL_SCANCODE_Z); // K1
+	input.SetMapping(input_k2, SDL_SCANCODE_X); // K2
+	input.SetMapping(input_k3, SDL_SCANCODE_C); // K3
+	input.SetMapping(input_k4, SDL_SCANCODE_V); // K4
 	input.SetMapping(input_select, SDL_SCANCODE_1);
 	input.SetMapping(input_start, SDL_SCANCODE_2);
 #endif
@@ -291,7 +297,7 @@ int main(int argc, char** argv, char** env) {
 		ImGui::Checkbox("Flip V", &video.output_vflip);
 
 		ImGui::Text("main_time: %d frame_count: %d sim FPS: %f", main_time, video.count_frame, video.stats_fps);
-		ImGui::Text("timestamp: %d actual ms: %d frame_ms: %d ", timestamp, timestamp/1000, video.count_frame * 1000);
+		ImGui::Text("timestamp: %d actual ms: %d frame_ms: %d ", timestamp, timestamp / 1000, video.count_frame * 1000);
 		ImGui::Text("minx: %d maxx: %d miny: %d maxy: %d", video.stats_xMin, video.stats_xMax, video.stats_yMin, video.stats_yMax);
 
 		// Draw VGA output
@@ -378,4 +384,3 @@ int main(int argc, char** argv, char** env) {
 
 	return 0;
 }
-	
